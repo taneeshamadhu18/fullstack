@@ -6,10 +6,9 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
-  User as FirebaseUser
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db } from '../config/firebase'; // Adjust import based on your setup
 import { toast } from 'react-hot-toast';
 
 interface User {
@@ -29,6 +28,7 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<void>;
 }
 
+// Create context with a default value
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
@@ -38,6 +38,7 @@ export const AuthContext = createContext<AuthContextType>({
   resetPassword: async () => {},
 });
 
+// AuthProvider component to manage authentication state
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,10 +49,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (firebaseUser) {
         try {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          
+
           if (userDoc.exists()) {
             const userData = userDoc.data() as Omit<User, 'uid'>;
-            
+
             setUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email || '',
@@ -71,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         setUser(null);
       }
-      
+
       setLoading(false);
     });
 
@@ -84,9 +85,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     role: 'admin' | 'faculty' | 'student',
     displayName: string
   ) => {
+    if (!role) {
+      toast.error('Role must be selected');
+      throw new Error('Role must be selected');
+    }
+
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
-      
+
       // Store additional user data in Firestore
       await setDoc(doc(db, 'users', result.user.uid), {
         email,
@@ -94,16 +100,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         displayName,
         createdAt: new Date().toISOString(),
       });
-      
+
       toast.success('Account created successfully');
     } catch (error: any) {
       console.error('Error during sign up:', error);
       let message = 'Failed to create account';
-      
+
       if (error.code === 'auth/email-already-in-use') {
         message = 'Email is already in use';
       }
-      
+
       toast.error(message);
       throw error;
     }
@@ -112,12 +118,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string): Promise<User> => {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
+
+      // Log the result to check the sign-in response
+      console.log('Sign-in result:', result);
+
       const userDoc = await getDoc(doc(db, 'users', result.user.uid));
-      
+
       if (!userDoc.exists()) {
-        throw new Error('User data not found');
+        throw new Error('User data not found in Firestore');
       }
-      
+
       const userData = userDoc.data() as Omit<User, 'uid'>;
       const user = {
         uid: result.user.uid,
@@ -126,17 +136,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         displayName: userData.displayName || result.user.displayName || '',
         photoURL: userData.photoURL || result.user.photoURL || '',
       };
-      
+
       toast.success('Signed in successfully');
       return user;
     } catch (error: any) {
-      console.error('Error during sign in:', error);
+      console.error('Error during sign-in:', error);
+
+      // Check and log Firebase specific error code and message
+      if (error.code) {
+        console.error('Firebase Error Code:', error.code);
+        console.error('Firebase Error Message:', error.message);
+      }
+
       let message = 'Failed to sign in';
-      
+
       if (error.code === 'auth/invalid-credential') {
         message = 'Invalid email or password';
       }
-      
+
       toast.error(message);
       throw error;
     }

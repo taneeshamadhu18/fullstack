@@ -4,7 +4,7 @@ import { useAuth } from './hooks/useAuth';
 
 // Layouts
 import AuthLayout from './layouts/AuthLayout';
-import DashboardLayout from './layouts/DashboardLayout';
+import DashboardLayout from './layouts/DashboardLayout'; // Assumed layout
 
 // Pages
 import LoginPage from './pages/auth/LoginPage';
@@ -23,10 +23,9 @@ import StudentPerformance from './pages/faculty/StudentPerformance';
 import StudentDashboard from './pages/student/StudentDashboard';
 import Grades from './pages/student/Grades';
 import Performance from './pages/student/Performance';
-//import CourseHistory from './pages/student/CourseHistory';
+import CourseHistory from './pages/student/CourseHistory';
 
 import NotFoundPage from './pages/NotFoundPage';
-import CourseHistory from './pages/student/CourseHistory';
 
 const App: React.FC = () => {
   const { user, loading } = useAuth();
@@ -81,40 +80,32 @@ const App: React.FC = () => {
   );
 };
 
-// Route guard components
+// Route Guard Components
 interface ProtectedRouteProps {
   isAllowed: boolean;
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ isAllowed, children }) => {
-  if (!isAllowed) {
-    return <Navigate to="/login" />;
-  }
+  if (!isAllowed) return <Navigate to="/login" />;
   return <>{children}</>;
 };
 
 const AdminRouteGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  if (user?.role !== 'admin') {
-    return <Navigate to={`/${user?.role || ''}`} />;
-  }
+  if (user?.role !== 'admin') return <Navigate to={`/${user?.role || ''}`} />;
   return <>{children}</>;
 };
 
 const FacultyRouteGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  if (user?.role !== 'faculty') {
-    return <Navigate to={`/${user?.role || ''}`} />;
-  }
+  if (user?.role !== 'faculty') return <Navigate to={`/${user?.role || ''}`} />;
   return <>{children}</>;
 };
 
 const StudentRouteGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  if (user?.role !== 'student') {
-    return <Navigate to={`/${user?.role || ''}`} />;
-  }
+  if (user?.role !== 'student') return <Navigate to={`/${user?.role || ''}`} />;
   return <>{children}</>;
 };
 

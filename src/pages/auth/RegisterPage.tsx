@@ -32,11 +32,16 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
+    if (!role) {
+      setError('Please select a role');
+      return;
+    }
+
     setLoading(true);
 
     try {
       await signUp(email, password, role, name);
-      navigate('/login');
+      navigate('/signIn');
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
         setError('Email is already in use');
@@ -94,43 +99,44 @@ const RegisterPage: React.FC = () => {
         />
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Register as
-          </label>
-          <div className="grid grid-cols-3 gap-3">
-            <button
-              type="button"
-              className={`px-4 py-2 text-sm font-medium rounded-md border ${
-                role === 'student'
-                  ? 'bg-primary-50 border-primary-500 text-primary-700'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-              onClick={() => setRole('student')}
-            >
-              Student
-            </button>
-            <button
-              type="button"
-              className={`px-4 py-2 text-sm font-medium rounded-md border ${
-                role === 'faculty'
-                  ? 'bg-primary-50 border-primary-500 text-primary-700'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-              onClick={() => setRole('faculty')}
-            >
-              Faculty
-            </button>
-            <button
-              type="button"
-              className={`px-4 py-2 text-sm font-medium rounded-md border ${
-                role === 'admin'
-                  ? 'bg-primary-50 border-primary-500 text-primary-700'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-              onClick={() => setRole('admin')}
-            >
-              Admin
-            </button>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Register as</label>
+          <div className="space-y-2">
+            <div className="flex items-center">
+              <input
+                type="radio"
+                id="student"
+                name="role"
+                value="student"
+                checked={role === 'student'}
+                onChange={() => setRole('student')}
+                className="mr-2"
+              />
+              <label htmlFor="student" className="text-gray-700">Student</label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="radio"
+                id="faculty"
+                name="role"
+                value="faculty"
+                checked={role === 'faculty'}
+                onChange={() => setRole('faculty')}
+                className="mr-2"
+              />
+              <label htmlFor="faculty" className="text-gray-700">Faculty</label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="radio"
+                id="admin"
+                name="role"
+                value="admin"
+                checked={role === 'admin'}
+                onChange={() => setRole('admin')}
+                className="mr-2"
+              />
+              <label htmlFor="admin" className="text-gray-700">Admin</label>
+            </div>
           </div>
         </div>
 
