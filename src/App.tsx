@@ -21,6 +21,7 @@ import GradeEntry from './pages/faculty/GradeEntry';
 import StudentPerformance from './pages/faculty/StudentPerformance';
 
 import StudentDashboard from './pages/student/StudentDashboard';
+import StudentCourses from './pages/student/StudentCourses';
 import Grades from './pages/student/Grades';
 import Performance from './pages/student/Performance';
 import CourseHistory from './pages/student/CourseHistory';
@@ -68,9 +69,10 @@ const App: React.FC = () => {
 
         {/* Student Routes */}
         <Route path="/student" element={<StudentRouteGuard><StudentDashboard /></StudentRouteGuard>} />
+        <Route path="/student/courses" element={<StudentRouteGuard><StudentCourses /></StudentRouteGuard>} />
         <Route path="/student/grades" element={<StudentRouteGuard><Grades /></StudentRouteGuard>} />
         <Route path="/student/performance" element={<StudentRouteGuard><Performance /></StudentRouteGuard>} />
-        <Route path="/student/CourseHistory" element={<StudentRouteGuard><CourseHistory /></StudentRouteGuard>} />
+        <Route path="/student/course-history" element={<StudentRouteGuard><CourseHistory /></StudentRouteGuard>} />
       </Route>
 
       {/* Landing and Default Routes */}

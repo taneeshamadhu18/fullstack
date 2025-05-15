@@ -1,0 +1,108 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isFaculty() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'faculty';
+    }
+    
+    function isStudent() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student';
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAdmin() || isOwner(userId);
+      allow delete: if isAdmin();
+    }
+
+    // Courses collection
+    match /courses/{courseId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || 
+        (isFaculty() && resource.data.instructor == request.auth.uid);
+    }
+
+    // Assignments collection
+    match /assignments/{assignmentId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdmin() || 
+        (isFaculty() && get(/databases/$(database)/documents/courses/$(resource.data.courseId)).data.instructor == request.auth.uid);
+    }
+
+    // Submissions collection
+    match /submissions/{submissionId} {
+      allow read: if isAdmin() || 
+        isFaculty() || 
+        (isStudent() && resource.data.studentId == request.auth.uid);
+      allow create: if isStudent() && 
+        request.resource.data.studentId == request.auth.uid;
+      allow update: if isAdmin() || 
+        (isFaculty() && get(/databases/$(database)/documents/courses/$(resource.data.courseId)).data.instructor == request.auth.uid);
+    }
+
+    // Grades collection
+    match /grades/{gradeId} {
+      allow read: if isAdmin() || 
+        isFaculty() || 
+        (isStudent() && resource.data.studentId == request.auth.uid);
+      allow create, update: if isAdmin() || 
+        (isFaculty() && get(/databases/$(database)/documents/courses/$(resource.data.courseId)).data.instructor == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Attendance collection
+    match /attendance/{attendanceId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin() || 
+        (isFaculty() && get(/databases/$(database)/documents/courses/$(resource.data.courseId)).data.instructor == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Departments collection
+    match /departments/{departmentId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Programs collection
+    match /programs/{programId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && 
+        resource.data.recipientId == request.auth.uid;
+      allow create: if isAdmin() || isFaculty();
+      allow update: if isAuthenticated() && 
+        resource.data.recipientId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // Academic Calendar collection
+    match /academicCalendar/{calendarId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+} 

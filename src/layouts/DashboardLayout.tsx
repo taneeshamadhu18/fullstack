@@ -38,9 +38,10 @@ const DashboardLayout: React.FC = () => {
     ],
     student: [
       { name: 'Dashboard', path: '/student', icon: <BarChart3 size={20} /> },
+      { name: 'Courses', path: '/student/courses', icon: <BookOpen size={20} /> },
       { name: 'Grades', path: '/student/grades', icon: <ClipboardList size={20} /> },
       { name: 'Performance', path: '/student/performance', icon: <BarChart3 size={20} /> },
-      { name: 'Courses', path: '/student/CourseHistory', icon: <BookOpen size={20} /> },
+      { name: 'Course History', path: '/student/course-history', icon: <BookOpenCheck size={20} /> },
     ],
   };
 
